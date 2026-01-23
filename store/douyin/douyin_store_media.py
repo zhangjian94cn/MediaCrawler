@@ -17,6 +17,7 @@
 # 详细许可条款请参阅项目根目录下的LICENSE文件。
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。
 
+import os
 import pathlib
 from typing import Dict
 
@@ -74,7 +75,58 @@ class DouYinImage(AbstractStoreImage):
 
 
 class DouYinVideo(AbstractStoreVideo):
-    video_store_path: str = "data/douyin/videos"
+    # 默认路径，可通过环境变量 DOUYIN_VIDEO_SAVE_DIR 覆盖
+    video_store_path: str = os.environ.get('DOUYIN_VIDEO_SAVE_DIR', 'data/douyin/videos')
+
+    @staticmethod
+    def sanitize_filename(title: str) -> str:
+        """
+        清理文件名中的非法字符
+        Args:
+            title: 原始标题
+        Returns:
+            清理后的文件名
+        """
+        import re
+        # 移除或替换非法字符
+        illegal_chars = r'[<>:"/\\|?*\n\r\t]'
+        clean_title = re.sub(illegal_chars, '', title)
+        # 限制长度（避免文件名过长）
+        if len(clean_title) > 100:
+            clean_title = clean_title[:100]
+        # 移除首尾空格
+        clean_title = clean_title.strip()
+        # 如果清理后为空，使用默认名称
+        if not clean_title:
+            clean_title = "video"
+        return clean_title
+
+    def make_save_file_name(self, aweme_id: str, title: str) -> str:
+        """
+        生成保存文件的完整路径，使用标题命名
+        Args:
+            aweme_id: 视频ID
+            title: 视频标题
+        Returns:
+            完整文件路径
+        """
+        clean_title = self.sanitize_filename(title)
+        return f"{self.video_store_path}/{clean_title}_{aweme_id}.mp4"
+
+    def video_exists(self, aweme_id: str, title: str) -> bool:
+        """
+        检查视频文件是否已存在（用于增量更新）
+        Args:
+            aweme_id: 视频ID
+            title: 视频标题
+        Returns:
+            bool: 文件是否存在
+        """
+        save_file_name = self.make_save_file_name(aweme_id, title)
+        file_path = pathlib.Path(save_file_name)
+        if file_path.exists() and file_path.stat().st_size > 0:
+            return True
+        return False
 
     async def store_video(self, video_content_item: Dict):
         """
@@ -86,35 +138,32 @@ class DouYinVideo(AbstractStoreVideo):
         Returns:
 
         """
-        await self.save_video(video_content_item.get("aweme_id"), video_content_item.get("video_content"), video_content_item.get("extension_file_name"))
+        aweme_id = video_content_item.get("aweme_id")
+        title = video_content_item.get("title", "video")
+        video_content = video_content_item.get("video_content")
+        await self.save_video(aweme_id, video_content, title)
 
-    def make_save_file_name(self, aweme_id: str, extension_file_name: str) -> str:
-        """
-        make save file name by store type
-
-        Args:
-            aweme_id: aweme id
-            extension_file_name: video filename with extension
-
-        Returns:
-
-        """
-        return f"{self.video_store_path}/{aweme_id}/{extension_file_name}"
-
-    async def save_video(self, aweme_id: str, video_content: str, extension_file_name):
+    async def save_video(self, aweme_id: str, video_content: bytes, title: str):
         """
         save video to local
 
         Args:
             aweme_id: aweme id
             video_content: video content
-            extension_file_name: video filename with extension
+            title: 视频标题
 
         Returns:
 
         """
-        pathlib.Path(self.video_store_path + "/" + aweme_id).mkdir(parents=True, exist_ok=True)
-        save_file_name = self.make_save_file_name(aweme_id, extension_file_name)
+        # 确保目录存在
+        pathlib.Path(self.video_store_path).mkdir(parents=True, exist_ok=True)
+        save_file_name = self.make_save_file_name(aweme_id, title)
+        
+        # 检查文件是否已存在
+        if pathlib.Path(save_file_name).exists():
+            utils.logger.info(f"[DouYinVideoStoreImplement.save_video] Video already exists, skipping: {save_file_name}")
+            return
+        
         async with aiofiles.open(save_file_name, 'wb') as f:
             await f.write(video_content)
             utils.logger.info(f"[DouYinVideoStoreImplement.save_video] save video {save_file_name} success ...")

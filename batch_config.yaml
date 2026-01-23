@@ -1,0 +1,82 @@
+# MediaCrawler 批量抓取配置文件
+# 配置格式说明：
+#   - name: 任务名称（用于日志和文件夹命名）
+#   - platform: 平台 (dy=抖音, xhs=小红书, bili=B站, ks=快手, wb=微博)
+#   - type: 抓取类型 (creator=创作者主页, search=关键词搜索, detail=指定帖子)
+#   - ids: 账号ID或URL列表（creator模式用）
+#   - keywords: 关键词列表（search模式用）
+#   - save_dir: 自定义保存目录（可选，不填则使用默认 data/{platform}）
+#   - get_media: 是否下载视频/图片 (true/false)
+#   - max_notes: 最大抓取数量
+
+# ==================== 抖音账号抓取配置 ====================
+douyin_creators:
+  # 示例1：抓取某个抖音博主的所有视频
+  # - name: "自己装逼的路飞"
+  #   platform: dy
+  #   type: creator
+  #   ids:
+  #     - "https://www.douyin.com/user/MS4wLjABAAAAWGpsDROINTbv0jkE3kjo5hnoebSQNeMiUOwk1esfNJrDE_XxS2fQ1Ddl0WJc3sNB"
+  #   save_dir: "/Volumes/video-02-documentary/抖音/自己装逼的路飞"  # 留空使用默认路径: data/douyin/
+  #   get_media: true  # 是否下载视频
+  #   max_notes: 2000    # 最多抓取50个视频
+
+  # 示例1：抓取某个抖音博主的所有视频
+  - name: "自己学易的路飞"
+    platform: dy
+    type: creator
+    ids:
+      - "https://www.douyin.com/user/MS4wLjABAAAA4JaMR36fF7jCWTYb1whrc6kBZBhvJBp1YMOzOZqHkkU"
+    save_dir: "/Volumes/video-02-documentary/抖音/自己学易的路飞"  # 留空使用默认路径: data/douyin/
+    get_media: true  # 是否下载视频
+    max_notes: 2000    # 最多抓取50个视频
+
+  - name: "自己胡说的路飞"
+    platform: dy
+    type: creator
+    ids:
+      - "https://www.douyin.com/user/MS4wLjABAAAAIWPzWcjOGY70ERZfuFlox6JZuScg1veX3lMqqhUGdorFLkZETKtoRe1lWcVBTo0y"
+    save_dir: "/Volumes/video-02-documentary/抖音/自己胡说的路飞"  # 留空使用默认路径: data/douyin/
+    get_media: true  # 是否下载视频
+    max_notes: 2000    # 最多抓取50个视频
+
+
+  # 示例2：抓取另一个博主
+  # - name: "示例博主2"
+  #   platform: dy
+  #   type: creator
+  #   ids:
+  #     - "你的目标账号URL"
+  #   save_dir: "/Users/zhangjian/Downloads/抖音视频/博主2"
+  #   get_media: true
+  #   max_notes: 100
+
+# ==================== 小红书账号抓取配置 ====================
+xhs_creators:
+  # - name: "小红书博主1"
+  #   platform: xhs
+  #   type: creator
+  #   ids:
+  #     - "https://www.xiaohongshu.com/user/profile/xxx"
+  #   save_dir: ""
+  #   get_media: true
+  #   max_notes: 30
+
+# ==================== 关键词搜索配置 ====================
+search_tasks:
+  # - name: "编程相关"
+  #   platform: xhs
+  #   type: search
+  #   keywords:
+  #     - "编程副业"
+  #     - "Python教程"
+  #   save_dir: ""
+  #   max_notes: 20
+
+# ==================== 全局设置 ====================
+global_settings:
+  login_type: qrcode      # 登录方式: qrcode, phone, cookie
+  headless: false         # 是否无头模式
+  save_format: json       # 保存格式: json, csv, db, sqlite, excel
+  get_comments: false      # 是否抓取评论
+  max_comments: 10        # 每个帖子最多抓取评论数

@@ -86,7 +86,7 @@ CRAWLER_MAX_NOTES_COUNT = 15
 MAX_CONCURRENCY_NUM = 1
 
 # 是否开启爬媒体模式（包含图片或视频资源），默认不开启爬媒体
-ENABLE_GET_MEIDAS = False
+ENABLE_GET_MEIDAS = True
 
 # 是否开启爬评论模式, 默认开启爬评论
 ENABLE_GET_COMMENTS = True

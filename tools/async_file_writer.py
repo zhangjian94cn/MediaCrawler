@@ -35,7 +35,13 @@ class AsyncFileWriter:
         self.wordcloud_generator = AsyncWordCloudGenerator() if config.ENABLE_GET_WORDCLOUD else None
 
     def _get_file_path(self, file_type: str, item_type: str) -> str:
-        base_path = f"data/{self.platform}/{file_type}"
+        # 检查是否有自定义保存路径（通过环境变量设置）
+        custom_save_dir = os.environ.get(f'{self.platform.upper()}_VIDEO_SAVE_DIR', '')
+        if custom_save_dir:
+            # 如果有自定义路径，JSON/CSV 文件保存到该目录下的 data 子目录
+            base_path = f"{custom_save_dir}/data"
+        else:
+            base_path = f"data/{self.platform}/{file_type}"
         pathlib.Path(base_path).mkdir(parents=True, exist_ok=True)
         file_name = f"{self.crawler_type}_{item_type}_{utils.get_current_date()}.{file_type}"
         return f"{base_path}/{file_name}"

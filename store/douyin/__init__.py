@@ -263,16 +263,28 @@ async def update_dy_aweme_image(aweme_id, pic_content, extension_file_name):
     await DouYinImage().store_image({"aweme_id": aweme_id, "pic_content": pic_content, "extension_file_name": extension_file_name})
 
 
-async def update_dy_aweme_video(aweme_id, video_content, extension_file_name):
+async def update_dy_aweme_video(aweme_id, video_content, title):
     """
     Update Douyin short video
     Args:
-        aweme_id:
-        video_content:
-        extension_file_name:
+        aweme_id: 视频ID
+        video_content: 视频内容
+        title: 视频标题（用于命名文件）
 
     Returns:
 
     """
+    await DouYinVideo().store_video({"aweme_id": aweme_id, "video_content": video_content, "title": title})
 
-    await DouYinVideo().store_video({"aweme_id": aweme_id, "video_content": video_content, "extension_file_name": extension_file_name})
+
+async def check_video_exists(aweme_id: str, title: str) -> bool:
+    """
+    检查视频是否已存在（用于增量更新）
+    Args:
+        aweme_id: 视频ID
+        title: 视频标题
+
+    Returns:
+        bool: 是否已存在
+    """
+    return DouYinVideo().video_exists(aweme_id, title)

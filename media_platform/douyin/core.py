@@ -443,15 +443,21 @@ class DouYinCrawler(AbstractCrawler):
         if not config.ENABLE_GET_MEIDAS:
             return
         aweme_id = aweme_item.get("aweme_id")
+        title = aweme_item.get("desc", "") or aweme_item.get("title", "") or aweme_id
 
         # 视频 url，永远存在，但为短视频类型时的文件其实是音频文件
         video_download_url: str = douyin_store._extract_video_download_url(aweme_item)
 
         if not video_download_url:
             return
+        
+        # 检查是否已存在同名文件（增量更新）
+        if await douyin_store.check_video_exists(aweme_id, title):
+            utils.logger.info(f"[DouYinCrawler.get_aweme_video] Video already exists, skipping: {title}")
+            return
+        
         content = await self.dy_client.get_aweme_media(video_download_url)
         await asyncio.sleep(random.random())
         if content is None:
             return
-        extension_file_name = f"video.mp4"
-        await douyin_store.update_dy_aweme_video(aweme_id, content, extension_file_name)
+        await douyin_store.update_dy_aweme_video(aweme_id, content, title)
