@@ -22,61 +22,313 @@ douyin_creators:
   #   max_notes: 2000    # 最多抓取50个视频
 
   # 示例1：抓取某个抖音博主的所有视频
-  - name: "自己学易的路飞"
-    platform: dy
-    type: creator
-    ids:
-      - "https://www.douyin.com/user/MS4wLjABAAAA4JaMR36fF7jCWTYb1whrc6kBZBhvJBp1YMOzOZqHkkU"
-    save_dir: "/Volumes/video-02-documentary/抖音/自己学易的路飞"  # 留空使用默认路径: data/douyin/
-    get_media: true  # 是否下载视频
-    max_notes: 2000    # 最多抓取50个视频
+# - name: "自己学易的路飞"
+#   platform: dy
+#   type: creator
+#   ids:
+#   - "https://www.douyin.com/user/MS4wLjABAAAA4JaMR36fF7jCWTYb1whrc6kBZBhvJBp1YMOzOZqHkkU"
+#   save_dir: "/Volumes/video-02-documentary/抖音/自己学易的路飞"
+#   get_media: true
+#   max_notes: 2000
 
-  - name: "自己胡说的路飞"
-    platform: dy
-    type: creator
-    ids:
-      - "https://www.douyin.com/user/MS4wLjABAAAAIWPzWcjOGY70ERZfuFlox6JZuScg1veX3lMqqhUGdorFLkZETKtoRe1lWcVBTo0y"
-    save_dir: "/Volumes/video-02-documentary/抖音/自己胡说的路飞"  # 留空使用默认路径: data/douyin/
-    get_media: true  # 是否下载视频
-    max_notes: 2000    # 最多抓取50个视频
-
-
-  # 示例2：抓取另一个博主
-  # - name: "示例博主2"
+  # - name: "自己胡说的路飞"
   #   platform: dy
   #   type: creator
   #   ids:
-  #     - "你的目标账号URL"
-  #   save_dir: "/Users/zhangjian/Downloads/抖音视频/博主2"
-  #   get_media: true
-  #   max_notes: 100
+  #     - "https://www.douyin.com/user/MS4wLjABAAAAIWPzWcjOGY70ERZfuFlox6JZuScg1veX3lMqqhUGdorFLkZETKtoRe1lWcVBTo0y"
+  #   save_dir: "/Volumes/video-02-documentary/抖音/自己胡说的路飞"  # 留空使用默认路径: data/douyin/
+  #   get_media: true  # 是否下载视频
+  #   max_notes: 2000    # 最多抓取50个视频
 
-# ==================== 小红书账号抓取配置 ====================
-xhs_creators:
-  # - name: "小红书博主1"
-  #   platform: xhs
-  #   type: creator
-  #   ids:
-  #     - "https://www.xiaohongshu.com/user/profile/xxx"
-  #   save_dir: ""
-  #   get_media: true
-  #   max_notes: 30
+# xhs_creators:
+#   # - name: "小红书博主1"
+#   #   platform: xhs
+#   #   type: creator
+#   #   ids:
+#   #     - "https://www.xiaohongshu.com/user/profile/xxx"
+#   #   save_dir: ""
+#   #   get_media: true
+#   #   max_notes: 30
 
-# ==================== 关键词搜索配置 ====================
-search_tasks:
-  # - name: "编程相关"
-  #   platform: xhs
-  #   type: search
-  #   keywords:
-  #     - "编程副业"
-  #     - "Python教程"
-  #   save_dir: ""
-  #   max_notes: 20
+# # ==================== 关键词搜索配置 ====================
+# search_tasks:
+#   # - name: "编程相关"
+#   #   platform: xhs
+#   #   type: search
+#   #   keywords:
+#   #     - "编程副业"
+#   #     - "Python教程"
+#   #   save_dir: ""
+#   #   max_notes: 20
 
-# ==================== 全局设置 ====================
-global_settings:
-  login_type: qrcode      # 登录方式: qrcode, phone, cookie
-  headless: false         # 是否无头模式
-  save_format: json       # 保存格式: json, csv, db, sqlite, excel
-  get_comments: false      # 是否抓取评论
-  max_comments: 10        # 每个帖子最多抓取评论数
+# # ==================== 全局设置 ====================
+# global_settings:
+#   login_type: qrcode      # 登录方式: qrcode, phone, cookie
+#   headless: false         # 是否无头模式
+#   save_format: json       # 保存格式: json, csv, db, sqlite, excel
+#   get_comments: false      # 是否抓取评论
+#   max_comments: 10        # 每个帖子最多抓取评论数
+- name: 道心空明
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAHAATZGoQnsnDVMV7c2GXyKtJnfrSJqCOOBu0YAMZ2tY"
+  save_dir: /Volumes/video-02-documentary/抖音/道心空明
+  get_media: true
+  max_notes: 2000
+- name: 环球路飞直播回放
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAklL4AN9Iie5aagXEkheLdTYIQlwAs4BztryG_zFQf-c"
+  save_dir: /Volumes/video-02-documentary/抖音/环球路飞直播回放
+  get_media: true
+  max_notes: 2000
+- name: 姜胡说
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAxaSHyjKQyfWHKjIS1mYbpxxEQZpT8ogl_eyks2M_Twc"
+  save_dir: /Volumes/video-02-documentary/抖音/姜胡说
+  get_media: true
+  max_notes: 2000
+- name: 这辈子再也不上班
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAZmEBWVj94eFBp9cIW7jrxmaffQwRdocMxEK528dByJW2qVn3B0wxjZmWyYIeLRlV"
+  save_dir: /Volumes/video-02-documentary/抖音/这辈子再也不上班
+  get_media: true
+  max_notes: 2000
+- name: 张师傅
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAApI6sO6KcixfXCpJaGccrQZJ5T3FAWFdVQR73owY2bGI"
+  save_dir: /Volumes/video-02-documentary/抖音/张师傅
+  get_media: true
+  max_notes: 2000
+- name: 高中的王南皓
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAsJ6ZcjDOHaEPZCODY9V7UuGWPkzibAANpjo1V-fF_H8lQu3cJ3859pwiLkxBjzwC"
+  save_dir: /Volumes/video-02-documentary/抖音/高中的王南皓
+  get_media: true
+  max_notes: 2000
+- name: 祝由十三科
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAn2nEMpdgd42bFny_kqoxP6YDx7vtbS-1tYsFgdoDLdoe5VetSc8r8BMDUP0eD-cI"
+  save_dir: /Volumes/video-02-documentary/抖音/祝由十三科
+  get_media: true
+  max_notes: 2000
+- name: 摩诘
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAbKk4wGTGfdolxMy_onpPNoed-kIC7BgaQVoBjcFBtteHy5s_USoEm6O1w6hJfMCB"
+  save_dir: /Volumes/video-02-documentary/抖音/摩诘
+  get_media: true
+  max_notes: 2000
+- name: 佛道禅缘
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAA-4jJiQn-RHr6IKixuI18qmFd4lc4ltmOg4cyDWhsjtE"
+  save_dir: /Volumes/video-02-documentary/抖音/佛道禅缘
+  get_media: true
+  max_notes: 2000
+- name: 勒一昂梁.
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAYFS9v-iMXTgf7m2dEWy3HUIbKDeou9t0RWA9aD5kVvg"
+  save_dir: /Volumes/video-02-documentary/抖音/勒一昂梁.
+  get_media: true
+  max_notes: 2000
+- name: 韬略学宫
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAJg_j_Zn1H-D5Of3r2OYp5BZc_JeYfHrZHZzRbNuldNLHXTLhjE4cyawteAyPRXjN"
+  save_dir: /Volumes/video-02-documentary/抖音/韬略学宫
+  get_media: true
+  max_notes: 2000
+- name: 古琴武怀琛
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAARLAcTHap9jq8hF9tNxOLfOtbmkV4ysb-qZTj3-Z99Z0ZFxv-fEIlqEW3R8YbPjpG"
+  save_dir: /Volumes/video-02-documentary/抖音/古琴武怀琛
+  get_media: true
+  max_notes: 2000
+- name: 九十九
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAA7z8VGLdiFK3QFLVqJiQnFU6PizFEChHcAoHpy8TNSvC6C9oZ4Z8CGUm4M6NuVDPB"
+  save_dir: /Volumes/video-02-documentary/抖音/九十九
+  get_media: true
+  max_notes: 2000
+- name: 小小李学传承
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAA-Xz8SIgi488ymH6C8IDbTb5m0TWvVZ4kMi5vMydL99A"
+  save_dir: /Volumes/video-02-documentary/抖音/小小李学传承
+  get_media: true
+  max_notes: 2000
+- name: 王老太站桩心得
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAZ6B31BJLCipVjCbXub8ErWtK__zND8uV8ywySjKSJ-6xJRly5P0ffzYHLDsCrIDD"
+  save_dir: /Volumes/video-02-documentary/抖音/王老太站桩心得
+  get_media: true
+  max_notes: 2000
+- name: 叨客魏生命沙龙24370534237
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAphQ65yhIKd8YjI2B0i_Es2ibJPxw4tUe_jMAjY84zPI1BJAcVV0cZgoVoOJjzQbH"
+  save_dir: /Volumes/video-02-documentary/抖音/叨客魏生命沙龙24370534237
+  get_media: true
+  max_notes: 2000
+- name: 全嘻嘻❤️28号珍珠29号倍轻松按摩仪
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAU541n1HAjiyeVmvfZlGjhtKz2UCJ_A0VfsoLT1lLcXcmliZGg7BstoL1gMAUeOYn"
+  save_dir: /Volumes/video-02-documentary/抖音/全嘻嘻❤️28号珍珠29号倍轻松按摩仪
+  get_media: true
+  max_notes: 2000
+- name: 中医匡武医生
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAbn7PZIAcGY0MC_JMPrmGstuDtoy1lgXq4WWm0f3kpCo"
+  save_dir: /Volumes/video-02-documentary/抖音/中医匡武医生
+  get_media: true
+  max_notes: 2000
+- name: 啊粥粥啊粥
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAwRT4Xg2m6naOC0KQkFlzC2tTk-kpIxmd2YdSkd_PSQK-tWcXGzjOUXuR4U3ZAvs2"
+  save_dir: /Volumes/video-02-documentary/抖音/啊粥粥啊粥
+  get_media: true
+  max_notes: 2000
+- name: 《兴农五册》作者
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAJT0i66W71lWcDqLwLNMmj0ZrVZtfX4Togps1qACZ79c"
+  save_dir: /Volumes/video-02-documentary/抖音/《兴农五册》作者
+  get_media: true
+  max_notes: 2000
+- name: 王德峰
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAdZa3643GJ0jwXV1BeuU-jZZQQ1dCW4T3tp_UBturuP8svLZcU-edA_GMXRv1z0o5"
+  save_dir: /Volumes/video-02-documentary/抖音/王德峰
+  get_media: true
+  max_notes: 2000
+- name: 83萌叔
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAYlTvn_GWEqdI-2qBEsQ8Qw15kVfQGtOsW7lIQ-Q-k4A"
+  save_dir: /Volumes/video-02-documentary/抖音/83萌叔
+  get_media: true
+  max_notes: 2000
+- name: 七七日记
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAARFrMleGdlQKFHUu36M09SJ6nUPKDPXQo3jegxENTfWvOzWlOK3EmdGiO0DbfkIp_"
+  save_dir: /Volumes/video-02-documentary/抖音/七七日记
+  get_media: true
+  max_notes: 2000
+- name: 中医樊旭教授
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAALj3lUi-khADfTIlmJGIcjkMWW9S3iRCmEbaURRjkpoQ"
+  save_dir: /Volumes/video-02-documentary/抖音/中医樊旭教授
+  get_media: true
+  max_notes: 2000
+- name: 八爪Master
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAARJQljiKcsmHnyoon6i_vlGLXujf7XyxVdrty-bBFc84"
+  save_dir: /Volumes/video-02-documentary/抖音/八爪Master
+  get_media: true
+  max_notes: 2000
+- name: 王翊
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAA7ovjYYxwaXGU2CPj4wV5lEu_Myd2BMY9tEeL0TvUo80DXcOLOx3Pas8i9eI22E8"
+  save_dir: /Volumes/video-02-documentary/抖音/王翊
+  get_media: true
+  max_notes: 2000
+- name: 我是洋房房
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAApfSfq27YNA7xhXYB4GtH5pz5NJxwsF0r5MFKP5nLayzt4YJMu8a5UjFLVbV-XNL-"
+  save_dir: /Volumes/video-02-documentary/抖音/我是洋房房
+  get_media: true
+  max_notes: 2000
+- name: 叶大大
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAi7e2hhROedOOODeu9-9twduoglUZstaZ8Rq7BSaxo6RunaNdUTgPPmw73l6NTBEn"
+  save_dir: /Volumes/video-02-documentary/抖音/叶大大
+  get_media: true
+  max_notes: 2000
+- name: ✨三生带你合道养生
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAATIvrbOboSVAQ15uq1FSYDWHByPeV2x_iuCVWMWCYtM"
+  save_dir: /Volumes/video-02-documentary/抖音/✨三生带你合道养生
+  get_media: true
+  max_notes: 2000
+- name: 傅佩荣
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAeWxwC9uGqSxHAOaQadaZgwOiuoXEPsJJ4031EA36LJ4"
+  save_dir: /Volumes/video-02-documentary/抖音/傅佩荣
+  get_media: true
+  max_notes: 2000
+- name: 我叫刘长春
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAX6f_j8XDs3En19UJgwyvFGEd7XWEn3JFUhqEo_HCdbxpHAP-qjD0CUVCI3kXqq2U"
+  save_dir: /Volumes/video-02-documentary/抖音/我叫刘长春
+  get_media: true
+  max_notes: 2000
+- name: 艾维奇Vic
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAczcZgfDJtJ-MwClXIjPH_QRcUphk41pMDw6OpNnsRz1p4NYa9rzwQKORjWdCDUAc"
+  save_dir: /Volumes/video-02-documentary/抖音/艾维奇Vic
+  get_media: true
+  max_notes: 2000
+- name: 孩儿他姥姥
+  platform: dy
+  type: creator
+  ids:
+  - "https://www.douyin.com/user/MS4wLjABAAAAcnV_rInNihqeKGIi0-Dv5u5S8_eGeaQ2QIsIs2Xy_NL3BxOpV8fJ4RcgxVi7P6-_"
+  save_dir: /Volumes/video-02-documentary/抖音/孩儿他姥姥
+  get_media: true
+  max_notes: 2000
