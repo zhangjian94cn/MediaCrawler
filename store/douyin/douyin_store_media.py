@@ -158,12 +158,13 @@ class DouYinVideo(AbstractStoreVideo):
         # 确保目录存在
         pathlib.Path(self.video_store_path).mkdir(parents=True, exist_ok=True)
         save_file_name = self.make_save_file_name(aweme_id, title)
-        
+
         # 检查文件是否已存在
-        if pathlib.Path(save_file_name).exists():
+        file_path = pathlib.Path(save_file_name)
+        if file_path.exists() and file_path.stat().st_size > 0:
             utils.logger.info(f"[DouYinVideoStoreImplement.save_video] Video already exists, skipping: {save_file_name}")
             return
-        
+
         async with aiofiles.open(save_file_name, 'wb') as f:
             await f.write(video_content)
             utils.logger.info(f"[DouYinVideoStoreImplement.save_video] save video {save_file_name} success ...")

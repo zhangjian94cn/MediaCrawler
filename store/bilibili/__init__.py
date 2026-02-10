@@ -147,6 +147,19 @@ async def store_video(aid, video_content, extension_file_name):
     })
 
 
+async def check_video_exists(aid, extension_file_name="video.mp4") -> bool:
+    """
+    Check whether bilibili video file already exists
+    Args:
+        aid:
+        extension_file_name:
+
+    Returns:
+
+    """
+    return BilibiliVideo().video_exists(aid, extension_file_name)
+
+
 async def batch_update_bilibili_creator_fans(creator_info: Dict, fans_list: List[Dict]):
     if not fans_list:
         return

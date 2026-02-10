@@ -591,13 +591,16 @@ class BilibiliCrawler(AbstractCrawler):
         if video_url == "":
             utils.logger.info("[BilibiliCrawler.get_bilibili_video] get video url failed")
             return
+        extension_file_name = "video.mp4"
+        if await bilibili_store.check_video_exists(aid, extension_file_name):
+            utils.logger.info(f"[BilibiliCrawler.get_bilibili_video] Video already exists, skipping: aid={aid}")
+            return
 
         content = await self.bili_client.get_video_media(video_url)
         await asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC)
         utils.logger.info(f"[BilibiliCrawler.get_bilibili_video] Sleeping for {config.CRAWLER_MAX_SLEEP_SEC} seconds after fetching video {aid}")
         if content is None:
             return
-        extension_file_name = f"video.mp4"
         await bilibili_store.store_video(aid, content, extension_file_name)
 
     async def get_all_creator_details(self, creator_url_list: List[str]):

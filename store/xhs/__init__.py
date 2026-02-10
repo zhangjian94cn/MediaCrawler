@@ -257,3 +257,16 @@ async def update_xhs_note_video(note_id, video_content, extension_file_name):
     """
 
     await XiaoHongShuVideo().store_video({"notice_id": note_id, "video_content": video_content, "extension_file_name": extension_file_name})
+
+
+async def check_xhs_note_video_exists(note_id, extension_file_name) -> bool:
+    """
+    Check whether xhs note video file already exists
+    Args:
+        note_id:
+        extension_file_name:
+
+    Returns:
+
+    """
+    return XiaoHongShuVideo().video_exists(note_id, extension_file_name)

@@ -58,6 +58,21 @@ class BilibiliVideo(AbstractStoreVideo):
         """
         return f"{self.video_store_path}/{aid}/{extension_file_name}"
 
+    def video_exists(self, aid: int, extension_file_name: str = "video.mp4") -> bool:
+        """
+        check whether the target video already exists
+
+        Args:
+            aid: aid
+            extension_file_name: target file name with extension
+
+        Returns:
+
+        """
+        save_file_name = self.make_save_file_name(str(aid), extension_file_name)
+        file_path = pathlib.Path(save_file_name)
+        return file_path.exists() and file_path.stat().st_size > 0
+
     async def save_video(self, aid: int, video_content: str, extension_file_name="mp4"):
         """
         save video to local
@@ -72,6 +87,10 @@ class BilibiliVideo(AbstractStoreVideo):
         """
         pathlib.Path(self.video_store_path + "/" + str(aid)).mkdir(parents=True, exist_ok=True)
         save_file_name = self.make_save_file_name(str(aid), extension_file_name)
+        file_path = pathlib.Path(save_file_name)
+        if file_path.exists() and file_path.stat().st_size > 0:
+            utils.logger.info(f"[BilibiliVideoImplement.save_video] Video already exists, skipping: {save_file_name}")
+            return
         async with aiofiles.open(save_file_name, 'wb') as f:
             await f.write(video_content)
             utils.logger.info(f"[BilibiliVideoImplement.save_video] save save_video {save_file_name} success ...")

@@ -502,10 +502,14 @@ class XiaoHongShuCrawler(AbstractCrawler):
             return
         videoNum = 0
         for url in videos:
+            extension_file_name = f"{videoNum}.mp4"
+            if await xhs_store.check_xhs_note_video_exists(note_id, extension_file_name):
+                utils.logger.info(f"[XiaoHongShuCrawler.get_notice_video] Video already exists, skipping: note_id={note_id}, file={extension_file_name}")
+                videoNum += 1
+                continue
             content = await self.xhs_client.get_note_media(url)
             await asyncio.sleep(random.random())
             if content is None:
                 continue
-            extension_file_name = f"{videoNum}.mp4"
-            videoNum += 1
             await xhs_store.update_xhs_note_video(note_id, content, extension_file_name)
+            videoNum += 1

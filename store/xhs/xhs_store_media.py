@@ -105,6 +105,21 @@ class XiaoHongShuVideo(AbstractStoreVideo):
         """
         return f"{self.video_store_path}/{notice_id}/{extension_file_name}"
 
+    def video_exists(self, notice_id: str, extension_file_name: str) -> bool:
+        """
+        check whether the target video already exists
+
+        Args:
+            notice_id: notice id
+            extension_file_name: video filename with extension
+
+        Returns:
+
+        """
+        save_file_name = self.make_save_file_name(notice_id, extension_file_name)
+        file_path = pathlib.Path(save_file_name)
+        return file_path.exists() and file_path.stat().st_size > 0
+
     async def save_video(self, notice_id: str, video_content: str, extension_file_name):
         """
         save video to local
@@ -119,6 +134,10 @@ class XiaoHongShuVideo(AbstractStoreVideo):
         """
         pathlib.Path(self.video_store_path + "/" + notice_id).mkdir(parents=True, exist_ok=True)
         save_file_name = self.make_save_file_name(notice_id, extension_file_name)
+        file_path = pathlib.Path(save_file_name)
+        if file_path.exists() and file_path.stat().st_size > 0:
+            utils.logger.info(f"[XiaoHongShuVideoStoreImplement.save_video] Video already exists, skipping: {save_file_name}")
+            return
         async with aiofiles.open(save_file_name, 'wb') as f:
             await f.write(video_content)
             utils.logger.info(f"[XiaoHongShuVideoStoreImplement.save_video] save video {save_file_name} success ...")
