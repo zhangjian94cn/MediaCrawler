@@ -36,10 +36,18 @@ def init_loging_config():
     if not log_file_path.is_absolute():
         log_file_path = project_root / log_file_path
 
-    handlers = [logging.StreamHandler()]
+    console_level_name = os.environ.get("MEDIA_CRAWLER_CONSOLE_LOG_LEVEL", "WARNING").upper()
+    console_level = getattr(logging, console_level_name, logging.WARNING)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(console_level)
+
+    handlers = [console_handler]
     try:
         log_file_path.parent.mkdir(parents=True, exist_ok=True)
-        handlers.append(logging.FileHandler(log_file_path, mode="a", encoding="utf-8"))
+        file_handler = logging.FileHandler(log_file_path, mode="a", encoding="utf-8")
+        file_handler.setLevel(level)
+        handlers.append(file_handler)
     except OSError as exc:
         log_file_error = exc
 
@@ -64,6 +72,9 @@ def init_loging_config():
         _logger.info(
             f"[tools.utils.init_loging_config] Logging to append-mode file: {log_file_path}"
         )
+    _logger.info(
+        f"[tools.utils.init_loging_config] Console log level: {logging.getLevelName(console_level)}"
+    )
 
     return _logger
 

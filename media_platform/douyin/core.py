@@ -20,6 +20,8 @@
 import asyncio
 import os
 import random
+import shutil
+import sys
 from asyncio import Task
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
@@ -63,6 +65,8 @@ class DouYinCrawler(AbstractCrawler):
         self.video_progress_downloaded: int = 0
         self.video_progress_skipped: int = 0
         self.video_progress_failed: int = 0
+        self.video_progress_current_title: str = ""
+        self.video_progress_current_status: str = ""
 
     def _reset_video_progress(self, context: str) -> None:
         """重置当前视频下载进度状态"""
@@ -73,9 +77,60 @@ class DouYinCrawler(AbstractCrawler):
         self.video_progress_downloaded = 0
         self.video_progress_skipped = 0
         self.video_progress_failed = 0
+        self.video_progress_current_title = ""
+        self.video_progress_current_status = ""
         if not self.video_progress_enabled:
             return
+        self._emit_terminal_progress()
         utils.logger.info(f"[DouYinCrawler.video_progress] Start tracking context={context}")
+
+    def _build_progress_bar(self, width: int = 26) -> str:
+        """构建终端展示的进度条文本"""
+        if self.video_progress_total <= 0:
+            return "·" * width
+
+        ratio = min(max(self.video_progress_processed / self.video_progress_total, 0.0), 1.0)
+        filled = int(width * ratio)
+        return ("#" * filled) + ("-" * (width - filled))
+
+    @staticmethod
+    def _clean_progress_text(text: str, max_len: int = 50) -> str:
+        normalized = (text or "").replace("\n", " ").replace("\r", " ").strip()
+        if len(normalized) <= max_len:
+            return normalized
+        return f"{normalized[:max_len - 3]}..."
+
+    def _emit_terminal_progress(self, final: bool = False) -> None:
+        """在终端输出当前视频下载进度，避免刷屏覆盖"""
+        if not self.video_progress_enabled:
+            return
+
+        total = self.video_progress_total
+        processed = self.video_progress_processed
+        percent = (processed / total * 100) if total > 0 else 0.0
+        counter = f"{processed}/{total if total > 0 else '?'}"
+        bar = self._build_progress_bar()
+        context = self._clean_progress_text(self.video_progress_context, max_len=30)
+        current_title = self._clean_progress_text(self.video_progress_current_title)
+        current_status = self._clean_progress_text(self.video_progress_current_status, max_len=8)
+
+        line = (
+            f"[下载进度][{context}] [{bar}] {counter} {percent:6.2f}% "
+            f"已下:{self.video_progress_downloaded} 跳过:{self.video_progress_skipped} 失败:{self.video_progress_failed}"
+        )
+        if current_status:
+            line += f" 状态:{current_status}"
+        if current_title:
+            line += f" 当前:{current_title}"
+
+        terminal_width = shutil.get_terminal_size((160, 20)).columns
+        if terminal_width > 16 and len(line) > terminal_width - 1:
+            line = f"{line[:terminal_width - 4]}..."
+
+        if sys.stdout.isatty():
+            print(f"\r\033[2K{line}", end="\n" if final else "", flush=True)
+        else:
+            print(line, flush=True)
 
     def _increase_video_progress_total(self, aweme_items: List[Dict]) -> None:
         """根据作品列表累计可下载视频总数"""
@@ -96,6 +151,8 @@ class DouYinCrawler(AbstractCrawler):
             return
 
         self.video_progress_total += discovered
+        self.video_progress_current_status = f"发现{self.video_progress_total}个"
+        self._emit_terminal_progress()
         utils.logger.info(
             f"[DouYinCrawler.video_progress] context={self.video_progress_context} discovered={discovered}, total={self.video_progress_total}"
         )
@@ -129,6 +186,14 @@ class DouYinCrawler(AbstractCrawler):
         clean_title = (title or aweme_id or "video").replace("\n", " ").strip()
         if len(clean_title) > 60:
             clean_title = f"{clean_title[:57]}..."
+        status_map = {
+            "downloaded": "已下载",
+            "skipped": "已跳过",
+            "failed": "失败",
+        }
+        self.video_progress_current_status = status_map.get(status, status)
+        self.video_progress_current_title = clean_title
+        self._emit_terminal_progress()
         utils.logger.info(
             f"[DouYinCrawler.video_progress] context={self.video_progress_context} "
             f"progress={self.video_progress_processed}/{self.video_progress_total} ({progress_percent:.2f}%), "
@@ -144,12 +209,16 @@ class DouYinCrawler(AbstractCrawler):
             self.video_progress_total = self.video_progress_processed
 
         if self.video_progress_total == 0:
+            self.video_progress_current_status = "无视频"
+            self._emit_terminal_progress(final=True)
             utils.logger.info(
                 f"[DouYinCrawler.video_progress] context={self.video_progress_context} no downloadable videos found."
             )
             return
 
         progress_percent = (self.video_progress_processed / self.video_progress_total) * 100
+        self.video_progress_current_status = "完成"
+        self._emit_terminal_progress(final=True)
         utils.logger.info(
             f"[DouYinCrawler.video_progress] context={self.video_progress_context} completed "
             f"{self.video_progress_processed}/{self.video_progress_total} ({progress_percent:.2f}%), "
@@ -387,7 +456,8 @@ class DouYinCrawler(AbstractCrawler):
             if creator_info:
                 await douyin_store.save_creator(user_id, creator=creator_info)
 
-            self._reset_video_progress(context=f"creator:{user_id}")
+            creator_name = (creator_info.get("user", {}) if creator_info else {}).get("nickname", user_id)
+            self._reset_video_progress(context=f"creator:{creator_name}")
 
             # Get all video information of the creator
             all_video_list = await self.dy_client.get_all_user_aweme_posts(sec_user_id=user_id, callback=self.fetch_creator_video_detail)
