@@ -20,6 +20,8 @@
 
 import argparse
 import logging
+import os
+from pathlib import Path
 
 from .crawler_util import *
 from .slider_util import *
@@ -28,16 +30,40 @@ from .time_util import *
 
 def init_loging_config():
     level = logging.INFO
+    log_file_error = None
+    project_root = Path(__file__).resolve().parent.parent
+    log_file_path = Path(os.environ.get("MEDIA_CRAWLER_LOG_FILE", "logs/media_crawler.log")).expanduser()
+    if not log_file_path.is_absolute():
+        log_file_path = project_root / log_file_path
+
+    handlers = [logging.StreamHandler()]
+    try:
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
+        handlers.append(logging.FileHandler(log_file_path, mode="a", encoding="utf-8"))
+    except OSError as exc:
+        log_file_error = exc
+
     logging.basicConfig(
         level=level,
         format="%(asctime)s %(name)s %(levelname)s (%(filename)s:%(lineno)d) - %(message)s",
-        datefmt='%Y-%m-%d %H:%M:%S'
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=handlers,
+        force=True,
     )
     _logger = logging.getLogger("MediaCrawler")
     _logger.setLevel(level)
 
     # Disable httpx INFO level logs
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+    if log_file_error:
+        _logger.warning(
+            f"[tools.utils.init_loging_config] Failed to initialize log file at {log_file_path}: {log_file_error}"
+        )
+    else:
+        _logger.info(
+            f"[tools.utils.init_loging_config] Logging to append-mode file: {log_file_path}"
+        )
 
     return _logger
 

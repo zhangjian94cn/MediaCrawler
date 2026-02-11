@@ -21,7 +21,7 @@ import asyncio
 import os
 import random
 from asyncio import Task
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from playwright.async_api import (
     BrowserContext,
@@ -56,6 +56,105 @@ class DouYinCrawler(AbstractCrawler):
         self.index_url = "https://www.douyin.com"
         self.cdp_manager = None
         self.ip_proxy_pool = None  # 代理IP池，用于代理自动刷新
+        self.video_progress_context: str = ""
+        self.video_progress_enabled: bool = False
+        self.video_progress_total: int = 0
+        self.video_progress_processed: int = 0
+        self.video_progress_downloaded: int = 0
+        self.video_progress_skipped: int = 0
+        self.video_progress_failed: int = 0
+
+    def _reset_video_progress(self, context: str) -> None:
+        """重置当前视频下载进度状态"""
+        self.video_progress_enabled = bool(config.ENABLE_GET_MEIDAS)
+        self.video_progress_context = context
+        self.video_progress_total = 0
+        self.video_progress_processed = 0
+        self.video_progress_downloaded = 0
+        self.video_progress_skipped = 0
+        self.video_progress_failed = 0
+        if not self.video_progress_enabled:
+            return
+        utils.logger.info(f"[DouYinCrawler.video_progress] Start tracking context={context}")
+
+    def _increase_video_progress_total(self, aweme_items: List[Dict]) -> None:
+        """根据作品列表累计可下载视频总数"""
+        if not self.video_progress_enabled:
+            return
+        discovered = 0
+        for aweme_item in aweme_items:
+            if not aweme_item:
+                continue
+            note_download_url = douyin_store._extract_note_image_list(aweme_item)
+            if note_download_url:
+                continue
+            video_download_url = douyin_store._extract_video_download_url(aweme_item)
+            if video_download_url:
+                discovered += 1
+
+        if discovered <= 0:
+            return
+
+        self.video_progress_total += discovered
+        utils.logger.info(
+            f"[DouYinCrawler.video_progress] context={self.video_progress_context} discovered={discovered}, total={self.video_progress_total}"
+        )
+
+    def _record_video_progress(
+        self,
+        aweme_id: str,
+        title: str,
+        status: Literal["downloaded", "skipped", "failed"],
+    ) -> None:
+        """记录单个视频下载结果并打印整体进度"""
+        if not self.video_progress_enabled:
+            return
+        self.video_progress_processed += 1
+
+        if status == "downloaded":
+            self.video_progress_downloaded += 1
+        elif status == "skipped":
+            self.video_progress_skipped += 1
+        else:
+            self.video_progress_failed += 1
+
+        if self.video_progress_total < self.video_progress_processed:
+            self.video_progress_total = self.video_progress_processed
+
+        progress_percent = (
+            (self.video_progress_processed / self.video_progress_total) * 100
+            if self.video_progress_total
+            else 0.0
+        )
+        clean_title = (title or aweme_id or "video").replace("\n", " ").strip()
+        if len(clean_title) > 60:
+            clean_title = f"{clean_title[:57]}..."
+        utils.logger.info(
+            f"[DouYinCrawler.video_progress] context={self.video_progress_context} "
+            f"progress={self.video_progress_processed}/{self.video_progress_total} ({progress_percent:.2f}%), "
+            f"status={status}, aweme_id={aweme_id}, title={clean_title}, "
+            f"downloaded={self.video_progress_downloaded}, skipped={self.video_progress_skipped}, failed={self.video_progress_failed}"
+        )
+
+    def _finalize_video_progress(self) -> None:
+        """输出本轮视频下载进度汇总"""
+        if not self.video_progress_enabled:
+            return
+        if self.video_progress_total < self.video_progress_processed:
+            self.video_progress_total = self.video_progress_processed
+
+        if self.video_progress_total == 0:
+            utils.logger.info(
+                f"[DouYinCrawler.video_progress] context={self.video_progress_context} no downloadable videos found."
+            )
+            return
+
+        progress_percent = (self.video_progress_processed / self.video_progress_total) * 100
+        utils.logger.info(
+            f"[DouYinCrawler.video_progress] context={self.video_progress_context} completed "
+            f"{self.video_progress_processed}/{self.video_progress_total} ({progress_percent:.2f}%), "
+            f"downloaded={self.video_progress_downloaded}, skipped={self.video_progress_skipped}, failed={self.video_progress_failed}"
+        )
 
     async def start(self) -> None:
         playwright_proxy_format, httpx_proxy_format = None, None
@@ -123,6 +222,7 @@ class DouYinCrawler(AbstractCrawler):
         for keyword in config.KEYWORDS.split(","):
             source_keyword_var.set(keyword)
             utils.logger.info(f"[DouYinCrawler.search] Current keyword: {keyword}")
+            self._reset_video_progress(context=f"search:{keyword}")
             aweme_list: List[str] = []
             page = 0
             dy_search_id = ""
@@ -152,6 +252,7 @@ class DouYinCrawler(AbstractCrawler):
                     break
                 dy_search_id = posts_res.get("extra", {}).get("logid", "")
                 page_aweme_list = []
+                page_aweme_items = []
                 for post_item in posts_res.get("data"):
                     try:
                         aweme_info: Dict = (post_item.get("aweme_info") or post_item.get("aweme_mix_info", {}).get("mix_items")[0])
@@ -159,6 +260,11 @@ class DouYinCrawler(AbstractCrawler):
                         continue
                     aweme_list.append(aweme_info.get("aweme_id", ""))
                     page_aweme_list.append(aweme_info.get("aweme_id", ""))
+                    page_aweme_items.append(aweme_info)
+
+                self._increase_video_progress_total(page_aweme_items)
+
+                for aweme_info in page_aweme_items:
                     await douyin_store.update_douyin_aweme(aweme_item=aweme_info)
                     await self.get_aweme_media(aweme_item=aweme_info)
                 
@@ -169,10 +275,12 @@ class DouYinCrawler(AbstractCrawler):
                 await asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC)
                 utils.logger.info(f"[DouYinCrawler.search] Sleeping for {config.CRAWLER_MAX_SLEEP_SEC} seconds after page {page-1}")
             utils.logger.info(f"[DouYinCrawler.search] keyword:{keyword}, aweme_list:{aweme_list}")
+            self._finalize_video_progress()
 
     async def get_specified_awemes(self):
         """Get the information and comments of the specified post from URLs or IDs"""
         utils.logger.info("[DouYinCrawler.get_specified_awemes] Parsing video URLs...")
+        self._reset_video_progress(context="detail")
         aweme_id_list = []
         for video_url in config.DY_SPECIFIED_ID_LIST:
             try:
@@ -199,10 +307,12 @@ class DouYinCrawler(AbstractCrawler):
         semaphore = asyncio.Semaphore(config.MAX_CONCURRENCY_NUM)
         task_list = [self.get_aweme_detail(aweme_id=aweme_id, semaphore=semaphore) for aweme_id in aweme_id_list]
         aweme_details = await asyncio.gather(*task_list)
+        self._increase_video_progress_total([aweme_detail for aweme_detail in aweme_details if aweme_detail is not None])
         for aweme_detail in aweme_details:
             if aweme_detail is not None:
                 await douyin_store.update_douyin_aweme(aweme_item=aweme_detail)
                 await self.get_aweme_media(aweme_item=aweme_detail)
+        self._finalize_video_progress()
         await self.batch_get_note_comments(aweme_id_list)
 
     async def get_aweme_detail(self, aweme_id: str, semaphore: asyncio.Semaphore) -> Any:
@@ -277,8 +387,11 @@ class DouYinCrawler(AbstractCrawler):
             if creator_info:
                 await douyin_store.save_creator(user_id, creator=creator_info)
 
+            self._reset_video_progress(context=f"creator:{user_id}")
+
             # Get all video information of the creator
             all_video_list = await self.dy_client.get_all_user_aweme_posts(sec_user_id=user_id, callback=self.fetch_creator_video_detail)
+            self._finalize_video_progress()
 
             video_ids = [video_item.get("aweme_id") for video_item in all_video_list]
             await self.batch_get_note_comments(video_ids)
@@ -291,6 +404,7 @@ class DouYinCrawler(AbstractCrawler):
         task_list = [self.get_aweme_detail(post_item.get("aweme_id"), semaphore) for post_item in video_list]
 
         note_details = await asyncio.gather(*task_list)
+        self._increase_video_progress_total([aweme_item for aweme_item in note_details if aweme_item is not None])
         for aweme_item in note_details:
             if aweme_item is not None:
                 await douyin_store.update_douyin_aweme(aweme_item=aweme_item)
@@ -398,13 +512,14 @@ class DouYinCrawler(AbstractCrawler):
             return
         # 笔记 urls 列表，若为短视频类型则返回为空列表
         note_download_url: List[str] = douyin_store._extract_note_image_list(aweme_item)
-        # 视频 url，永远存在，但为短视频类型时的文件其实是音频文件
-        video_download_url: str = douyin_store._extract_video_download_url(aweme_item)
         # TODO: 抖音并没采用音视频分离的策略，故音频可从原视频中分离，暂不提取
         if note_download_url:
             await self.get_aweme_images(aweme_item)
         else:
-            await self.get_aweme_video(aweme_item)
+            aweme_id = aweme_item.get("aweme_id")
+            title = aweme_item.get("desc", "") or aweme_item.get("title", "") or aweme_id
+            status = await self.get_aweme_video(aweme_item)
+            self._record_video_progress(aweme_id=aweme_id, title=title, status=status)
 
     async def get_aweme_images(self, aweme_item: Dict):
         """
@@ -433,7 +548,7 @@ class DouYinCrawler(AbstractCrawler):
             picNum += 1
             await douyin_store.update_dy_aweme_image(aweme_id, content, extension_file_name)
 
-    async def get_aweme_video(self, aweme_item: Dict):
+    async def get_aweme_video(self, aweme_item: Dict) -> Literal["downloaded", "skipped", "failed"]:
         """
         get aweme videos. please use get_aweme_media
 
@@ -441,7 +556,7 @@ class DouYinCrawler(AbstractCrawler):
             aweme_item (Dict): 抖音作品详情
         """
         if not config.ENABLE_GET_MEIDAS:
-            return
+            return "failed"
         aweme_id = aweme_item.get("aweme_id")
         title = aweme_item.get("desc", "") or aweme_item.get("title", "") or aweme_id
 
@@ -449,15 +564,16 @@ class DouYinCrawler(AbstractCrawler):
         video_download_url: str = douyin_store._extract_video_download_url(aweme_item)
 
         if not video_download_url:
-            return
+            return "failed"
         
         # 检查是否已存在同名文件（增量更新）
         if await douyin_store.check_video_exists(aweme_id, title):
             utils.logger.info(f"[DouYinCrawler.get_aweme_video] Video already exists, skipping: {title}")
-            return
+            return "skipped"
         
         content = await self.dy_client.get_aweme_media(video_download_url)
         await asyncio.sleep(random.random())
         if content is None:
-            return
+            return "failed"
         await douyin_store.update_dy_aweme_video(aweme_id, content, title)
+        return "downloaded"
