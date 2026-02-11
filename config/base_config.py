@@ -88,6 +88,10 @@ MAX_CONCURRENCY_NUM = 1
 # 是否开启爬媒体模式（包含图片或视频资源），默认不开启爬媒体
 ENABLE_GET_MEIDAS = True
 
+# 下载媒体资源时，是否继承系统代理环境变量（HTTP_PROXY / HTTPS_PROXY / ALL_PROXY）
+# False：仅使用项目显式代理（ENABLE_IP_PROXY）或直连，避免在下载大文件时误走 Clash 等系统代理
+MEDIA_DOWNLOAD_USE_SYSTEM_PROXY = False
+
 # 是否开启爬评论模式, 默认开启爬评论
 ENABLE_GET_COMMENTS = True
 

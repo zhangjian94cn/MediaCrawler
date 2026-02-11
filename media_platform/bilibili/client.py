@@ -222,7 +222,11 @@ class BilibiliClient(AbstractApiClient, ProxyRefreshMixin):
 
     async def get_video_media(self, url: str) -> Union[bytes, None]:
         # Follow CDN 302 redirects and treat any 2xx as success (some endpoints return 206)
-        async with httpx.AsyncClient(proxy=self.proxy, follow_redirects=True) as client:
+        async with httpx.AsyncClient(
+            proxy=self.proxy,
+            follow_redirects=True,
+            trust_env=config.MEDIA_DOWNLOAD_USE_SYSTEM_PROXY,
+        ) as client:
             try:
                 response = await client.request("GET", url, timeout=self.timeout, headers=self.headers)
                 response.raise_for_status()

@@ -189,7 +189,10 @@ class XiaoHongShuClient(AbstractApiClient, ProxyRefreshMixin):
         # Check if proxy is expired before request
         await self._refresh_proxy_if_expired()
 
-        async with httpx.AsyncClient(proxy=self.proxy) as client:
+        async with httpx.AsyncClient(
+            proxy=self.proxy,
+            trust_env=config.MEDIA_DOWNLOAD_USE_SYSTEM_PROXY,
+        ) as client:
             try:
                 response = await client.request("GET", url, timeout=self.timeout)
                 response.raise_for_status()

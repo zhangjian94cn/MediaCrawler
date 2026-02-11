@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Union, Optional
 import httpx
 from playwright.async_api import BrowserContext
 
+import config
 from base.base_crawler import AbstractApiClient
 from proxy.proxy_mixin import ProxyRefreshMixin
 from tools import utils
@@ -333,7 +334,10 @@ class DouYinClient(AbstractApiClient, ProxyRefreshMixin):
         return result
 
     async def get_aweme_media(self, url: str) -> Union[bytes, None]:
-        async with httpx.AsyncClient(proxy=self.proxy) as client:
+        async with httpx.AsyncClient(
+            proxy=self.proxy,
+            trust_env=config.MEDIA_DOWNLOAD_USE_SYSTEM_PROXY,
+        ) as client:
             try:
                 response = await client.request("GET", url, timeout=self.timeout, follow_redirects=True)
                 response.raise_for_status()
