@@ -150,6 +150,183 @@ uv run main.py --platform xhs --lt qrcode --type detail
 uv run main.py --help
 ```
 
+## 🎯 批量抓取管理工具
+
+MediaCrawler 提供了统一的批量抓取管理工具 `media_manager.py`，让您可以轻松管理多个创作者的批量抓取任务。
+
+### 📌 工具特点
+
+- **统一管理界面**：一个命令行工具整合所有批量抓取功能
+- **简化工作流程**：从添加创作者到批量抓取，全流程自动化
+- **智能链接解析**：自动解析抖音分享链接，获取博主真实名称
+- **配置验证**：内置配置文件验证功能
+- **任务管理**：查看、运行、管理所有批量抓取任务
+
+### 🚀 快速开始
+
+#### 1. 准备工作
+
+确保已经完成前置依赖安装（Python 环境、Playwright 等）。
+
+#### 2. 添加创作者链接
+
+将抖音分享文本粘贴到 `pending_links.txt` 文件中：
+
+```text
+# pending_links.txt
+1- 长按复制此条消息，打开抖音搜索，查看TA的更多作品。 https://v.douyin.com/xxxxx/ 1@5.com
+2- 长按复制此条消息，打开抖音搜索，查看TA的更多作品。 https://v.douyin.com/yyyyy/ 2@5.com
+```
+
+#### 3. 解析并添加到配置
+
+```shell
+# 基础模式：快速解析（使用 HTTP 请求）
+python media_manager.py add
+
+# 推荐模式：使用浏览器获取真实博主名称（更准确但较慢）
+python media_manager.py add --browser
+
+# 自动确认模式（不询问）
+python media_manager.py add --browser -y
+```
+
+#### 4. 查看任务列表
+
+```shell
+# 列出所有配置的批量抓取任务
+python media_manager.py list
+```
+
+#### 5. 运行批量抓取
+
+```shell
+# 运行所有任务
+python media_manager.py run
+
+# 只运行指定任务
+python media_manager.py run --task "博主名称"
+
+# Dry run 模式（预览不执行）
+python media_manager.py run --dry-run
+```
+
+### 📋 完整命令参考
+
+| 命令 | 说明 | 常用参数 |
+|------|------|----------|
+| `list` | 列出所有配置的任务 | 无 |
+| `add` | 添加新创作者到配置 | `--browser` 使用浏览器获取真实名称<br>`-y` 自动确认 |
+| `update` | 更新现有博主的真实名称 | 无 |
+| `validate` | 验证配置文件格式 | 无 |
+| `run` | 运行批量抓取任务 | `--task` 指定任务名<br>`--dry-run` 预览模式 |
+| `workflow` | 显示完整工作流程说明 | 无 |
+| `quick` | 快速开始（自动执行所有步骤） | 无 |
+
+### 💡 使用示例
+
+#### 示例 1：完整工作流程
+
+```shell
+# 步骤 1：编辑 pending_links.txt，添加抖音分享链接
+
+# 步骤 2：解析链接并添加到配置（使用浏览器获取真实名称）
+python media_manager.py add --browser
+
+# 步骤 3：验证配置文件
+python media_manager.py validate
+
+# 步骤 4：查看所有任务
+python media_manager.py list
+
+# 步骤 5：运行批量抓取
+python media_manager.py run
+```
+
+#### 示例 2：快速开始模式
+
+```shell
+# 一键执行：解析链接 → 更新名称 → 验证配置 → 显示任务列表
+python media_manager.py quick
+
+# 然后运行批量抓取
+python media_manager.py run
+```
+
+#### 示例 3：只运行特定任务
+
+```shell
+# 查看所有任务名称
+python media_manager.py list
+
+# 只运行指定的博主任务
+python media_manager.py run --task "王德峰"
+```
+
+### ⚙️ 配置说明
+
+批量抓取的配置文件位于 `batch_config.yaml`，格式如下：
+
+```yaml
+douyin_creators:
+  - name: "博主名称"
+    platform: dy
+    type: creator
+    ids:
+      - "https://www.douyin.com/user/USER_ID"
+    save_dir: "/path/to/save/博主名称"
+    get_media: true
+    max_notes: 2000
+```
+
+**配置项说明：**
+- `name`: 任务名称（用于日志和文件夹命名）
+- `platform`: 平台代码（dy=抖音）
+- `type`: 抓取类型（creator=创作者主页）
+- `ids`: 博主主页 URL 列表
+- `save_dir`: 自定义保存目录
+- `get_media`: 是否下载视频/图片
+- `max_notes`: 最大抓取数量
+
+### 🔧 常见问题
+
+<details>
+<summary><strong>Q: pending_links.txt 文件在哪里？</strong></summary>
+
+A: 在项目根目录下创建 `pending_links.txt` 文件，将抖音分享文本粘贴进去即可。
+</details>
+
+<details>
+<summary><strong>Q: 如何获取抖音分享链接？</strong></summary>
+
+A: 在抖音 APP 中打开博主主页，点击右上角分享按钮，选择"复制链接"，然后粘贴到 `pending_links.txt` 文件中。
+</details>
+
+<details>
+<summary><strong>Q: 为什么有些博主名称显示为"博主_xxxxx"？</strong></summary>
+
+A: 这是因为使用基础模式（HTTP 请求）无法获取真实名称。建议使用 `--browser` 参数或运行 `python media_manager.py update` 来更新名称。
+</details>
+
+<details>
+<summary><strong>Q: 批量抓取失败怎么办？</strong></summary>
+
+A:
+1. 确保已经完成登录（首次运行会弹出二维码）
+2. 检查配置文件格式：`python media_manager.py validate`
+3. 使用 dry-run 模式测试：`python media_manager.py run --dry-run`
+4. 查看日志文件了解详细错误信息
+</details>
+
+### 📝 工作流程图
+
+```
+添加链接 → 解析链接 → 验证配置 → 查看任务 → 运行抓取
+   ↓          ↓          ↓          ↓          ↓
+pending   add命令   validate   list命令   run命令
+_links.txt  (自动)    (可选)    (查看)    (执行)
+```
+
 ## WebUI支持
 
 <details>
